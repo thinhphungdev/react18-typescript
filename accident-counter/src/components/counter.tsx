@@ -1,13 +1,51 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useReducer } from 'react';
+
+type InitialState = {
+  count: number;
+  draftCount: string | number;
+};
+
+const initialState: InitialState = {
+  count: 0,
+  draftCount: 0,
+};
+
+const reducer = (state: InitialState, action: any) => {
+  const { count, draftCount } = state;
+
+  if (action.type === 'increment') {
+    const newCount = count + 1;
+    return { count: newCount, draftCount: newCount };
+  }
+
+  if (action.type === 'decrement') {
+    const newCount = count - 1;
+    return { count: newCount, draftCount: newCount };
+  }
+
+  if (action.type === 'reset') {
+    return { count: 0, draftCount: 0 };
+  }
+
+  if (action.type === 'updateDraftCount') {
+    console.log('updateDraftCount');
+
+    return { count, draftCount: action.payload };
+  }
+
+  if (action.type === 'updateCountFromDraft') {
+    return { count: Number(draftCount), draftCount };
+  }
+
+  return state;
+};
 
 const Counter = () => {
-  const [count, setCount] = useState<number>(0);
-  const [draftCounter, setDraftCounter] = useState<number>(0);
+  const [{ count, draftCount }, dispatch] = useReducer(reducer, initialState);
 
   function onUpdateCounterHandler(e: FormEvent) {
     e.preventDefault();
-    setCount(draftCounter);
-    setDraftCounter(0);
+    dispatch({ type: 'updateCountFromDraft' });
   }
 
   return (
@@ -15,11 +53,11 @@ const Counter = () => {
       <h1>Days Since the Last Accident</h1>
       <p className="text-6xl">{count}</p>
       <div className="flex gap-2">
-        <button onClick={() => setCount((count) => count - 1)}>
+        <button onClick={() => dispatch({ type: 'descrement' })}>
           ➖ Decrement
         </button>
-        <button onClick={() => setCount(0)}>🔁 Reset</button>
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button onClick={() => dispatch({ type: 'reset' })}>🔁 Reset</button>
+        <button onClick={() => dispatch({ type: 'increment' })}>
           ➕ Increment
         </button>
       </div>
@@ -27,8 +65,13 @@ const Counter = () => {
         <form onSubmit={onUpdateCounterHandler}>
           <input
             type="number"
-            onChange={(e) => setDraftCounter(e.target.valueAsNumber)}
-            value={draftCounter}
+            onChange={(e) =>
+              dispatch({
+                action: 'updateDraftCount',
+                value: e.target.valueAsNumber,
+              })
+            }
+            value={draftCount}
           />
           <button type="submit">Update Counter</button>
         </form>
