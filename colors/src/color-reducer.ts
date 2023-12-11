@@ -1,5 +1,13 @@
 import { rgb } from "color-convert";
 
+type HexColor = `#${string}`
+
+type RGBString = `rgb(${number}, ${number}, ${number})`
+
+type ColorFormats = 'rgb' | 'hex' | 'hsl' | 'hsv'
+
+type ActionTypes = `update-${ColorFormats}-color`
+
 export type UpdateColorAction = {
     type: 'update-hex-color',
     payload: {
@@ -14,6 +22,8 @@ export type UpdateRGBColorAction = {
     }
 }
 
+export type AdjustColorActions = UpdateRGBColorAction | UpdateColorAction
+
 type ColorState = {
     hexColor: string;
 }
@@ -24,7 +34,7 @@ export const initialState: ColorState = {
 
 export const colorReducer = (
     state: ColorState,
-    action: UpdateRGBColorAction | UpdateColorAction
+    action: AdjustColorActions
 ) => {
     if (action.type === 'update-hex-color') {
         const { hexColor } = action.payload;
@@ -32,7 +42,7 @@ export const colorReducer = (
     }
 
     if (action.type === 'update-rgba-color') {
-        const hexColor = rgb.hex(action.payload.rgb);
+        const hexColor = '#' + rgb.hex(action.payload.rgb);
         return { ...state, hexColor }
     }
 
